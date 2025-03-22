@@ -21,6 +21,8 @@
     "react-hook-form": "^7.54.2",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.4.0",
+    "single-spa": "^6.0.3",
+    "single-spa-react": "^6.0.2",
     "yup": "^1.6.1"
   },
   "devDependencies": {
