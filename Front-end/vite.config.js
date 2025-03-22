@@ -1,17 +1,23 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
+  plugins: [react()],
   build: {
-    lib: {
-      entry: './src/main.jsx', // El archivo que maneja la lógica de Single SPA
-      name: 'App',
-      fileName: (format) => `app.${format}.js`,
-    },
+    // Configuramos múltiples entradas: main, login y register
     rollupOptions: {
-      external: ['single-spa'],  // No empaquetamos single-spa dentro del bundle
+      input: {
+        main: './src/main.jsx',
+        login: './src/Components/Login/Login.single-spa.js',
+        register: './src/Components/Register/Register.single-spa.js',
+      },
       output: {
-        globals: {
-          'single-spa': 'singleSpa',  // Esto hace que single-spa esté disponible globalmente
+        // Opcional: definir nombres específicos para cada bundle
+        entryFileNames: (chunkInfo) => {
+          if (chunkInfo.name === 'main') return 'app.js';
+          if (chunkInfo.name === 'login') return 'login-app.js';
+          if (chunkInfo.name === 'register') return 'register-app.js';
+          return `[name].js`;
         },
       },
     },

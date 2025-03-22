@@ -1,14 +1,14 @@
 import React from 'react'; 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css'
-import Login from './Components/Login/Login'
-import Register from './Components/Register/Register'
+import Inicio from './Components/Inicio/Inicio'
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login/>}></Route>
-        <Route path="/Register" element={<Register/>}></Route>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={null} />
+        <Route path="/Inicio" element={<Inicio/>}></Route>
       </Routes>
     </Router>
   )
