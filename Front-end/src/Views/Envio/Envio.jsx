@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import React from 'react';
 import { yupResolver } from "@hookform/resolvers/yup";
-import { TextField, Button, Box, Typography, MenuItem, CircularProgress } from "@mui/material";
+import { TextField, Button, Box, Typography, MenuItem, Snackbar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Grid from '@mui/material/Grid2';
 import * as yup from "yup";
 import { jwtDecode } from "jwt-decode";
+import Alert from '@mui/material/Alert';
 import api from "../../Api/api";
 const schema = yup.object().shape({
     peso: yup.number().typeError("El peso debe ser un número decimal").positive("El peso debe ser mayor que cero")
@@ -40,18 +41,41 @@ const Envio = () => {
 
     const onSubmit = async (data) => {
         try {
+            const emailUser = localStorage.getItem('EmailUser');
             const token = localStorage.getItem("token");
             if (!token) throw new Error("No hay token");
+    
             const userId = jwtDecode(token).userId;
-            const response = await api.post(`/users/Envios/${userId}`, data); // Enviamos datos a la API
-            console.log(response)
-            setAlert({ open: true, severity: 'success', message: 'El pedido se registro correctamente' });
+    
+            // 1️⃣ Guardar el pedido en la base de datos
+            await api.post(`/users/Envios/${userId}`, data);
+    
+            // 2️⃣ Enviar el correo con la información del pedido
+            const emailData = {
+                to: emailUser, // Correo del usuario registrado
+                subject: "Confirmación de Envío",
+                datos: {
+                    peso: data.peso,
+                    dimension: data.dimension,
+                    tipoProducto: data.tipoProducto,
+                    direccionDestino: data.direccionDestino,
+                    ciudad: data.ciudad,
+                    estado: data.estado
+                }
+            };
+            console.log(emailData)
+    
+            await api.post(`/users/Envio/Correo`, emailData);
+    
+            // 3️⃣ Mostrar mensaje de éxito
+            setAlert({ open: true, severity: 'success', message: 'El pedido se registró y se envió el correo correctamente' });
             setShouldRedirect(true);
         } catch (error) {
-            console.error("Error al registrar usuario:", error.response?.data || error.message);
-            setAlert({ open: true, severity: 'error', message: 'No se puede registrar. Por favor inténtelo más tarde' });
+            console.error("Error en el proceso:", error.response?.data || error.message);
+            setAlert({ open: true, severity: 'error', message: 'No se puede registrar el pedido. Inténtelo más tarde' });
         }
     };
+    
 
     // Obtener los departamentos al cargar el componente
     useEffect(() => {
@@ -70,7 +94,7 @@ const Envio = () => {
 
     const handleDepartamentoChange = (event) => {
         const departamentoNombre = event.target.value;
-        setValue("estado", departamentoNombre); // 🔹 Guarda el nombre directamente
+        setValue("estado", departamentoNombre); 
       
         const departamentoSeleccionado = departamentos.find(d => d.name === departamentoNombre);
         if (!departamentoSeleccionado) {
@@ -96,12 +120,22 @@ const Envio = () => {
       
       const handleCiudadChange = (event) => {
         const ciudadNombre = event.target.value;
-        setValue("ciudad", ciudadNombre); // 🔹 Guarda el nombre directamente
+        setValue("ciudad", ciudadNombre); 
       };
       
 
     return (
         <Box>
+            <Snackbar
+                            open={alert.open}
+                            autoHideDuration={2000}
+                            onClose={handleCloseAlert}
+                            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                        >
+                            <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
+                                {alert.message}
+                            </Alert>
+                        </Snackbar>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Box sx={{ flexGrow: 1 }}>
                     <Grid marginBottom={3} container spacing={2}>

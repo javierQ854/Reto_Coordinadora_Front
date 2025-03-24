@@ -27,7 +27,8 @@ const Login = () => {
             const token = await loginUser(data.email, data.password);
             // Si el login es exitoso, guardamos el token en el estado global y redirigimos
             dispatch(login({ token }));  // Guardamos el token en el estado de Redux
-            localStorage.setItem('token', token); // Guardamos el token en localStorage para persistencia
+            localStorage.setItem('token', token);// Guardamos el token en localStorage para persistencia
+            localStorage.setItem('EmailUser', data.email )
             navigate('/Inicio'); // Redirigimos al Dashboard (o página protegida)
         } catch (error) {
             setErrorMessage("Credenciales incorrectas. Intenta nuevamente.");
