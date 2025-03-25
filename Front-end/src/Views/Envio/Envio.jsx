@@ -19,6 +19,9 @@ const schema = yup.object().shape({
     estado: yup.string().required("El departamento es obligatorio"),
 });
 const Envio = () => {
+    const [componentName, setComponentName] = useState('ListaEnvios');
+    
+        
     const [errorMessage, setErrorMessage] = useState("");
     const [alert, setAlert] = useState({ open: false, severity: '', message: '' });
     const [shouldRedirect, setShouldRedirect] = useState(false);
@@ -26,33 +29,30 @@ const Envio = () => {
     const [ciudades, setCiudades] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingCiudades, setLoadingCiudades] = useState(false);
+    const handleComponentChange = (componentName) => {
+        setComponentName(componentName);
+    };
     const handleCloseAlert = (event, reason) => {
         if (reason === 'clickaway') return;
         setAlert({ ...alert, open: false });
         if (shouldRedirect) {
-            navigate('/login'); // Redirige solo si el registro fue exitoso
+            handleComponentChange('ListaEnvios')
         }
     };
     const { register, handleSubmit, formState: { errors }, setValue } = useForm({
         resolver: yupResolver(schema),
     });
 
-    const navigate = useNavigate(); // Para redireccionar después del registro
-
+    const navigate = useNavigate();
     const onSubmit = async (data) => {
         try {
             const emailUser = localStorage.getItem('EmailUser');
             const token = localStorage.getItem("token");
             if (!token) throw new Error("No hay token");
-    
             const userId = jwtDecode(token).userId;
-    
-            // 1️⃣ Guardar el pedido en la base de datos
             await api.post(`/users/Envios/${userId}`, data);
-    
-            // 2️⃣ Enviar el correo con la información del pedido
             const emailData = {
-                to: emailUser, // Correo del usuario registrado
+                to: emailUser, 
                 subject: "Confirmación de Envío",
                 datos: {
                     peso: data.peso,
@@ -63,11 +63,8 @@ const Envio = () => {
                     estado: data.estado
                 }
             };
-            console.log(emailData)
-    
+
             await api.post(`/users/Envio/Correo`, emailData);
-    
-            // 3️⃣ Mostrar mensaje de éxito
             setAlert({ open: true, severity: 'success', message: 'El pedido se registró y se envió el correo correctamente' });
             setShouldRedirect(true);
         } catch (error) {
@@ -75,15 +72,12 @@ const Envio = () => {
             setAlert({ open: true, severity: 'error', message: 'No se puede registrar el pedido. Inténtelo más tarde' });
         }
     };
-    
-
-    // Obtener los departamentos al cargar el componente
     useEffect(() => {
         setLoading(true);
         fetch("https://api-colombia.com/api/v1/Department?sortDirection=asc")
             .then(response => response.json())
             .then(data => {
-                setDepartamentos(data); // Guardamos la lista de departamentos
+                setDepartamentos(data);
                 setLoading(false);
             })
             .catch(error => {
@@ -94,48 +88,48 @@ const Envio = () => {
 
     const handleDepartamentoChange = (event) => {
         const departamentoNombre = event.target.value;
-        setValue("estado", departamentoNombre); 
-      
+        setValue("estado", departamentoNombre);
+
         const departamentoSeleccionado = departamentos.find(d => d.name === departamentoNombre);
         if (!departamentoSeleccionado) {
-          console.error("No se encontró el departamento con nombre:", departamentoNombre);
-          return;
+            console.error("No se encontró el departamento con nombre:", departamentoNombre);
+            return;
         }
-      
+
         setCiudades([]);
         setValue("ciudad", "");
-      
+
         setLoadingCiudades(true);
         fetch(`https://api-colombia.com/api/v1/Department/${departamentoSeleccionado.id}/cities?sortDirection=asc`)
-          .then((response) => response.json())
-          .then((data) => {
-            setCiudades(data);
-            setLoadingCiudades(false);
-          })
-          .catch((error) => {
-            console.error("Error al obtener las ciudades", error);
-            setLoadingCiudades(false);
-          });
-      };
-      
-      const handleCiudadChange = (event) => {
+            .then((response) => response.json())
+            .then((data) => {
+                setCiudades(data);
+                setLoadingCiudades(false);
+            })
+            .catch((error) => {
+                console.error("Error al obtener las ciudades", error);
+                setLoadingCiudades(false);
+            });
+    };
+
+    const handleCiudadChange = (event) => {
         const ciudadNombre = event.target.value;
-        setValue("ciudad", ciudadNombre); 
-      };
-      
+        setValue("ciudad", ciudadNombre);
+    };
+
 
     return (
         <Box>
             <Snackbar
-                            open={alert.open}
-                            autoHideDuration={2000}
-                            onClose={handleCloseAlert}
-                            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                        >
-                            <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
-                                {alert.message}
-                            </Alert>
-                        </Snackbar>
+                open={alert.open}
+                autoHideDuration={2000}
+                onClose={handleCloseAlert}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseAlert} severity={alert.severity} sx={{ width: '100%' }}>
+                    {alert.message}
+                </Alert>
+            </Snackbar>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Box sx={{ flexGrow: 1 }}>
                     <Grid marginBottom={3} container spacing={2}>
@@ -193,9 +187,6 @@ const Envio = () => {
                                 </MenuItem>
                             ))}
                         </TextField>
-
-
-                        {/* Campo de Ciudad */}
                         <Grid item xs={6}>
                             <TextField
                                 {...register("ciudad")}

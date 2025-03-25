@@ -1,10 +1,16 @@
 import React, { Suspense } from 'react';
 
+
+
 // Mapa de componentes a cargar dinámicamente
 const componentsMap = {
   Login: React.lazy(() => import('../Views/Login/Login.jsx')),
   Envio: React.lazy(() => import('../Views/Envio/Envio.jsx')),
-  ListaEnvios: React.lazy(()=>import('../Views/ListaEnvios/ListaEnvios.jsx'))
+  ListaEnvios: React.lazy(()=>import('../Views/ListaEnvios/ListaEnvios.jsx')),
+  ListaOrdenes: React.lazy(()=>import('../Views/ListaOrdenes/ListaOrdenes.jsx')),
+  ListaRutas: React.lazy(()=>import('../Views/ListaRutas/ListaRutas.jsx')),
+  Transportista: React.lazy(()=>import('../Views/Transportista/Transportista.jsx')),
+  ListaTransportista: React.lazy(()=>import('../Views/ListaTransportista/ListaTransportista.jsx'))
   // Agregar más componentes aquí según se necesiten
 };
 

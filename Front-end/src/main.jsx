@@ -47,11 +47,45 @@ registerApplication({
   activeWhen: ['/Envio'],
 });
 
+registerApplication({
+  name: '@mi-app/dashboard',
+  app: () => import('./Views/DashBoard/DashBoard.single-spa.jsx'),
+  activeWhen: ['/DashBoard'],
+});
 
-// Iniciar Single SPA
+registerApplication({
+  name: '@mi-app/listaOrdenes',
+  app: () => import('./Views/ListaOrdenes/ListaOredenes-spa.jsx'),
+  activeWhen: ['/ListaOrdenes'],
+});
+
+registerApplication({
+  name: '@mi-app/listaRutas',
+  app: () => import('./Views/ListaRutas/ListaRutas.single-spa.jsx'),
+  activeWhen: ['/ListaRutas'],
+});
+
+registerApplication({
+  name: '@mi-app/rutas',
+  app: () => import('./Views/Rutas/Rutas.single-spa.jsx'),
+  activeWhen: ['/Rutas'],
+});
+
+registerApplication({
+  name: '@mi-app/listaTransportista',
+  app: () => import('./Views/ListaTransportista/ListaTransportista.single-spa.jsx'),
+  activeWhen: ['/ListaTransportista'],
+});
+
+registerApplication({
+  name: '@mi-app/Transportista',
+  app: () => import('./Views/Transportista/Transportista.single-spa.jsx'),
+  activeWhen: ['/Transportista'],
+});
+
 start();
 
-// Montar la aplicación principal (si la necesitas para otras rutas o un contenedor global)
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>

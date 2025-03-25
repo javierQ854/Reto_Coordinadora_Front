@@ -7,10 +7,12 @@ import { loginUser } from "../../Api/auth"; // Asumiendo que loginUser está en 
 import { useDispatch } from "react-redux";
 import { login } from "../../Redux/authSlice"; // Reducer para guardar el token
 import * as yup from "yup";
+import { jwtDecode } from "jwt-decode";
+
 
 const schema = yup.object().shape({
     email: yup.string().email("Correo inválido").required("El correo es obligatorio"),
-    password: yup.string().min(6, "Debe tener al menos 6 caracteres").required("La contraseña es obligatoria"),
+    password: yup.string().required("La contraseña es obligatoria"),
 });
 
 const Login = () => {
@@ -23,13 +25,20 @@ const Login = () => {
 
     const onSubmit = async (data) => {
         try {
-            // Llamamos a la API para hacer login
             const token = await loginUser(data.email, data.password);
-            // Si el login es exitoso, guardamos el token en el estado global y redirigimos
-            dispatch(login({ token }));  // Guardamos el token en el estado de Redux
-            localStorage.setItem('token', token);// Guardamos el token en localStorage para persistencia
+            
+            const decodeToken = jwtDecode(token)
+            const userRole = decodeToken.role
+            dispatch(login({ token }));  
+            localStorage.setItem('token', token);
             localStorage.setItem('EmailUser', data.email )
-            navigate('/Inicio'); // Redirigimos al Dashboard (o página protegida)
+            localStorage.setItem('UserRole',userRole)
+            if(userRole === "admin"){
+                navigate('/DashBoard')
+            }else{
+                navigate('/Inicio');
+            }
+            
         } catch (error) {
             setErrorMessage("Credenciales incorrectas. Intenta nuevamente.");
         }
